@@ -4,7 +4,7 @@ import sys
 import requests
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
-from moviepy import VideoFileClip, concatenate_videoclips
+from moviepy import VideoFileClip, concatenate_videoclips, AudioFileClip
 
 app = Flask(__name__)
 CORS(app)
@@ -13,6 +13,7 @@ CORS(app)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULT_DIR = os.path.join(BASE_DIR, "resultvideos")
 TEMP_DIR = os.path.join(BASE_DIR, "temp_uploads")
+MALE_VOICE_CANCEL_URL = "http://127.0.0.1:5001/process"
 
 if not os.path.exists(RESULT_DIR):
     os.makedirs(RESULT_DIR)
@@ -27,6 +28,7 @@ def export_video():
 
     video_file = request.files["video"]
     mute = request.form.get("mute") == "true"
+    cancel_male_voice = request.form.get("cancelMaleVoice") == "true"
 
     # segments should be a JSON string or multiple fields
     # For simplicity, let's assume it's passed as a JSON string in a form field
@@ -46,8 +48,40 @@ def export_video():
     temp_path = os.path.join(TEMP_DIR, temp_filename)
     video_file.save(temp_path)
 
+    processed_audio_path = None
+
     try:
+        # if not mute and cancelMaleVoice is true, then use api to cancel male voice
+        if not mute and cancel_male_voice:
+            try:
+                print(f"Calling male voice cancellation API for {temp_path}...")
+                with open(temp_path, "rb") as f:
+                    response = requests.post(
+                        MALE_VOICE_CANCEL_URL, files={"video": f}, timeout=300
+                    )
+                    if response.status_code == 200:
+                        # API returns a wav file
+                        processed_audio_path = temp_path + "_processed.wav"
+                        with open(processed_audio_path, "wb") as out:
+                            out.write(response.content)
+                        print("Male voice cancellation audio received.")
+                    else:
+                        print(
+                            f"Male voice cancel API failed with status {response.status_code}: {response.text}"
+                        )
+            except Exception as api_err:
+                print(f"Error calling male voice cancel API: {str(api_err)}")
+
         video = VideoFileClip(temp_path)
+        
+        # If we have processed audio, replace the video's audio before clipping
+        if processed_audio_path:
+            try:
+                new_audio = AudioFileClip(processed_audio_path)
+                video = video.with_audio(new_audio)
+            except Exception as audio_err:
+                print(f"Error applying processed audio: {str(audio_err)}")
+
         clips = []
 
         for seg in segments:
@@ -81,10 +115,15 @@ def export_video():
             c.close()
         final_clip.close()
 
-        # Clean up temp file
+        # Clean up temp files
         if os.path.exists(temp_path):
             try:
                 os.remove(temp_path)
+            except:
+                pass
+        if processed_audio_path and os.path.exists(processed_audio_path):
+            try:
+                os.remove(processed_audio_path)
             except:
                 pass
 
@@ -96,13 +135,4 @@ def export_video():
 
 
 if __name__ == "__main__":
-    url = "http://127.0.0.1:5001/process"
-    video_path = r"C:\Users\zhangrenyu\Downloads\exported_video_1769875161866.mp4"
-    output_file = r"D:\my-video-pro-aistudio\api_test_result.wav"
-    with open(video_path, "rb") as f:
-        response = requests.post(url, files={"video": f})
-    if response.status_code == 200:
-        with open(output_file, "wb") as f:
-            f.write(response.content)
-    print(f"Audio saved to {output_file}")
     app.run(debug=True, port=5000)

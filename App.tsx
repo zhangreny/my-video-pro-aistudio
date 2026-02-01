@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
   const [segments, setSegments] = useState<VideoSegment[]>([]);
   const [isMuted, setIsMuted] = useState(false);
+  const [isCancelMaleVoice, setIsCancelMaleVoice] = useState(false);
   const [isLooping, setIsLooping] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
@@ -21,6 +22,7 @@ const App: React.FC = () => {
     const formData = new FormData();
     formData.append('video', videoFile);
     formData.append('mute', isMuted.toString());
+    formData.append('cancelMaleVoice', isCancelMaleVoice.toString());
     formData.append('segments', JSON.stringify(segments));
 
     try {
@@ -96,6 +98,8 @@ const App: React.FC = () => {
           segments={segments}
           isMuted={isMuted}
           setIsMuted={setIsMuted}
+          isCancelMaleVoice={isCancelMaleVoice}
+          setIsCancelMaleVoice={setIsCancelMaleVoice}
           onAddSegment={addSegment}
           onRemoveSegment={removeSegment}
           onUpdateSegment={updateSegment}

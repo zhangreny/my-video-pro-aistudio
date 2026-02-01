@@ -8,6 +8,8 @@ interface SidebarProps {
   segments: VideoSegment[];
   isMuted: boolean;
   setIsMuted: (muted: boolean) => void;
+  isCancelMaleVoice: boolean;
+  setIsCancelMaleVoice: (cancel: boolean) => void;
   onAddSegment: () => void;
   onRemoveSegment: (id: string) => void;
   onUpdateSegment: (id: string, updates: Partial<VideoSegment>) => void;
@@ -21,6 +23,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   segments,
   isMuted,
   setIsMuted,
+  isCancelMaleVoice,
+  setIsCancelMaleVoice,
   onAddSegment,
   onRemoveSegment,
   onUpdateSegment,
@@ -66,6 +70,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 focus:outline-none ${isMuted ? 'bg-blue-600' : 'bg-zinc-700'}`}
           >
             <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${isMuted ? 'translate-x-5' : 'translate-x-0'}`}></div>
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg mt-2">
+          <div className="flex items-center space-x-3">
+            <svg className={`w-5 h-5 ${isCancelMaleVoice ? 'text-red-500' : 'text-blue-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+            </svg>
+            <span className="text-sm font-medium">Cancel Male Voice</span>
+          </div>
+          <button 
+            onClick={() => setIsCancelMaleVoice(!isCancelMaleVoice)}
+            className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 focus:outline-none ${isCancelMaleVoice ? 'bg-blue-600' : 'bg-zinc-700'}`}
+          >
+            <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${isCancelMaleVoice ? 'translate-x-5' : 'translate-x-0'}`}></div>
           </button>
         </div>
       </div>
