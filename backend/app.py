@@ -1,5 +1,7 @@
 import os
 import uuid
+import sys
+import requests
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 from moviepy import VideoFileClip, concatenate_videoclips
@@ -94,4 +96,13 @@ def export_video():
 
 
 if __name__ == "__main__":
+    url = "http://127.0.0.1:5001/process"
+    video_path = r"C:\Users\zhangrenyu\Downloads\exported_video_1769875161866.mp4"
+    output_file = r"D:\my-video-pro-aistudio\api_test_result.wav"
+    with open(video_path, "rb") as f:
+        response = requests.post(url, files={"video": f})
+    if response.status_code == 200:
+        with open(output_file, "wb") as f:
+            f.write(response.content)
+    print(f"Audio saved to {output_file}")
     app.run(debug=True, port=5000)
