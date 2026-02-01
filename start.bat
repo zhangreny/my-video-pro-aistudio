@@ -2,6 +2,16 @@
 TITLE Video Pro Editor - Full Stack Starter
 SETLOCAL
 
+echo [0.1/3] Cleaning resultvideos folder...
+IF EXIST "resultvideos\" (
+    del /Q /S "resultvideos\*.mp4" >nul 2>&1
+)
+
+echo [0.2/3] Cleaning temp_uploads folder...
+IF EXIST "temp_uploads\" (
+    del /Q /S "temp_uploads\*.mp4" >nul 2>&1
+)
+
 echo [1/3] Checking environment...
 IF NOT EXIST "backend\.venv" (
     echo Error: Backend virtual environment not found in backend\.venv
@@ -16,11 +26,11 @@ start /B "" "backend\.venv\Scripts\python.exe" backend\app.py
 echo [3/3] Starting Frontend (Vite)...
 echo.
 echo ======================================================
-echo   PROJECT IS RUNNING
-echo   - Frontend: http://localhost:5173
-echo   - Backend:  http://localhost:5000
+echo    PROJECT IS RUNNING
+echo    - Frontend: http://localhost:5173
+echo    - Backend:  http://localhost:5000
 echo.
-echo   PRESS CTRL+C IN THIS WINDOW TO STOP BOTH SERVERS
+echo    PRESS CTRL+C IN THIS WINDOW TO STOP BOTH SERVERS
 echo ======================================================
 echo.
 
