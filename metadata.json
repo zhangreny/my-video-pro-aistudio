@@ -1,0 +1,9 @@
+
+{
+  "name": "Gemini Video Pro Editor",
+  "description": "A professional-grade web-based video editor that allows importing, multi-segment cutting, volume control, and intelligent video analysis using Gemini API.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
