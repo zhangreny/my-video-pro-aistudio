@@ -1,21 +1,33 @@
 
 import React from 'react';
-import { VideoSegment } from '../types';
+import { VideoSegment, CropConfig } from '../types';
 
 interface TimelineProps {
   duration: number;
   currentTime: number;
   segments: VideoSegment[];
   onSeek: (time: number) => void;
+  cropConfig?: CropConfig;
+  videoWidth?: number;
+  videoHeight?: number;
 }
 
 export const Timeline: React.FC<TimelineProps> = ({
   duration,
   currentTime,
   segments,
-  onSeek
+  onSeek,
+  cropConfig,
+  videoWidth,
+  videoHeight
 }) => {
   const getPercentage = (time: number) => (time / duration) * 100;
+
+  // Calculate crop region as percentage of video
+  const cropLeftPct = videoWidth ? (cropConfig?.x || 0) / videoWidth * 100 : 0;
+  const cropTopPct = videoHeight ? (cropConfig?.y || 0) / videoHeight * 100 : 0;
+  const cropWidthPct = videoWidth ? (cropConfig?.width || 0) / videoWidth * 100 : 0;
+  const cropHeightPct = videoHeight ? (cropConfig?.height || 0) / videoHeight * 100 : 0;
 
   return (
     <div className="relative h-12 bg-zinc-950 rounded-lg border border-zinc-800 overflow-hidden group cursor-crosshair">
@@ -28,7 +40,7 @@ export const Timeline: React.FC<TimelineProps> = ({
 
       {/* Segments Display */}
       {segments.map((segment) => (
-        <div 
+        <div
           key={segment.id}
           className="absolute top-0 bottom-0 bg-blue-500/30 border-x border-blue-500/50 flex items-center justify-center text-[10px] font-bold text-blue-300"
           style={{
@@ -42,8 +54,19 @@ export const Timeline: React.FC<TimelineProps> = ({
         </div>
       ))}
 
+      {/* Crop Region Overlay */}
+      {cropConfig && cropConfig.enabled && cropConfig.width > 0 && cropConfig.height > 0 && (
+        <div
+          className="absolute top-0 bottom-0 bg-red-500/20 border border-red-500/50 pointer-events-none"
+          style={{
+            left: `${cropLeftPct}%`,
+            width: `${cropWidthPct}%`
+          }}
+        />
+      )}
+
       {/* Click-to-seek Overlay */}
-      <div 
+      <div
         className="absolute inset-0 z-10"
         onClick={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
@@ -54,7 +77,7 @@ export const Timeline: React.FC<TimelineProps> = ({
       ></div>
 
       {/* Playhead */}
-      <div 
+      <div
         className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20 pointer-events-none shadow-[0_0_10px_rgba(239,68,68,0.5)]"
         style={{ left: `${getPercentage(currentTime)}%` }}
       >
