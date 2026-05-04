@@ -20,3 +20,11 @@ export enum ExportStatus {
   COMPLETED = 'COMPLETED',
   ERROR = 'ERROR'
 }
+
+export interface CropConfig {
+  enabled: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}

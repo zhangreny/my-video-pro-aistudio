@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { VideoMetadata, VideoSegment } from '../types';
+import { VideoMetadata, VideoSegment, CropConfig } from '../types';
 import { formatTime } from '../utils/timeUtils';
 
 interface SidebarProps {
@@ -10,6 +10,8 @@ interface SidebarProps {
   setIsMuted: (muted: boolean) => void;
   isCancelMaleVoice: boolean;
   setIsCancelMaleVoice: (cancel: boolean) => void;
+  cropConfig: CropConfig;
+  setCropConfig: (config: CropConfig) => void;
   onAddSegment: () => void;
   onRemoveSegment: (id: string) => void;
   onUpdateSegment: (id: string, updates: Partial<VideoSegment>) => void;
@@ -24,6 +26,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setIsMuted,
   isCancelMaleVoice,
   setIsCancelMaleVoice,
+  cropConfig,
+  setCropConfig,
   onAddSegment,
   onRemoveSegment,
   onUpdateSegment,
@@ -78,12 +82,78 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </svg>
             <span className="text-sm font-medium">Cancel Male Voice</span>
           </div>
-          <button 
+          <button
             onClick={() => setIsCancelMaleVoice(!isCancelMaleVoice)}
             className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 focus:outline-none ${isCancelMaleVoice ? 'bg-blue-600' : 'bg-zinc-700'}`}
           >
             <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${isCancelMaleVoice ? 'translate-x-5' : 'translate-x-0'}`}></div>
           </button>
+        </div>
+
+        {/* Crop Settings */}
+        <div className="mt-2">
+          <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg">
+            <div className="flex items-center space-x-3">
+              <svg className={`w-5 h-5 ${cropConfig.enabled ? 'text-red-500' : 'text-blue-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="text-sm font-medium">Crop Settings</span>
+            </div>
+            <button
+              onClick={() => setCropConfig({ ...cropConfig, enabled: !cropConfig.enabled })}
+              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 focus:outline-none ${cropConfig.enabled ? 'bg-blue-600' : 'bg-zinc-700'}`}
+            >
+              <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${cropConfig.enabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+            </button>
+          </div>
+
+          {cropConfig.enabled && (
+            <div className="p-3 bg-zinc-800/30 rounded-lg mt-1 space-y-2">
+              <p className="text-[10px] text-zinc-500 italic">Based on original video size</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-zinc-500 uppercase font-bold">X</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={cropConfig.x}
+                    onChange={(e) => setCropConfig({ ...cropConfig, x: parseInt(e.target.value) || 0 })}
+                    className="w-full bg-zinc-900 text-xs p-1.5 rounded border border-zinc-700"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-zinc-500 uppercase font-bold">Y</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={cropConfig.y}
+                    onChange={(e) => setCropConfig({ ...cropConfig, y: parseInt(e.target.value) || 0 })}
+                    className="w-full bg-zinc-900 text-xs p-1.5 rounded border border-zinc-700"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-zinc-500 uppercase font-bold">Width</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={cropConfig.width}
+                    onChange={(e) => setCropConfig({ ...cropConfig, width: parseInt(e.target.value) || 0 })}
+                    className="w-full bg-zinc-900 text-xs p-1.5 rounded border border-zinc-700"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-zinc-500 uppercase font-bold">Height</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={cropConfig.height}
+                    onChange={(e) => setCropConfig({ ...cropConfig, height: parseInt(e.target.value) || 0 })}
+                    className="w-full bg-zinc-900 text-xs p-1.5 rounded border border-zinc-700"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

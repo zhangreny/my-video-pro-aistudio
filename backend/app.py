@@ -94,6 +94,22 @@ def export_video():
         # Concatenate clips in the order they were provided
         final_clip = concatenate_videoclips(clips)
 
+        # Apply crop if enabled
+        crop_config_raw = request.form.get("cropConfig")
+        if crop_config_raw:
+            try:
+                crop_config = json.loads(crop_config_raw)
+                if crop_config.get("enabled"):
+                    x = int(crop_config.get("x", 0))
+                    y = int(crop_config.get("y", 0))
+                    w = int(crop_config.get("width", 0))
+                    h = int(crop_config.get("height", 0))
+                    if w > 0 and h > 0:
+                        final_clip = final_clip.crop(x1=x, y1=y, x2=x+w, y2=y+h)
+                        print(f"Crop applied: x={x}, y={y}, width={w}, height={h}")
+            except Exception as crop_err:
+                print(f"Error applying crop: {str(crop_err)}")
+
         if mute:
             final_clip = final_clip.without_audio()
 
