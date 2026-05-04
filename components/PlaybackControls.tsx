@@ -10,6 +10,8 @@ interface PlaybackControlsProps {
   isLooping: boolean;
   setIsLooping: (loop: boolean) => void;
   seek: (time: number) => void;
+  onMarkPoint?: () => void;
+  hasVideo?: boolean;
 }
 
 export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
@@ -19,7 +21,9 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   duration,
   isLooping,
   setIsLooping,
-  seek
+  seek,
+  onMarkPoint,
+  hasVideo
 }) => {
   return (
     <div className="flex items-center space-x-6">
@@ -37,6 +41,18 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           </svg>
         )}
       </button>
+
+      {hasVideo && onMarkPoint && (
+        <button
+          onClick={onMarkPoint}
+          className="text-zinc-400 hover:text-blue-500 transition-colors p-2 bg-zinc-800 rounded-full"
+          title="Mark Point"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        </button>
+      )}
 
       <div className="flex-1 flex flex-col space-y-1">
         <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono uppercase tracking-widest">

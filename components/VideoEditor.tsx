@@ -12,6 +12,8 @@ interface VideoEditorProps {
   setIsLooping: (loop: boolean) => void;
   onTimeUpdate: (time: number) => void;
   setDuration: (duration: number) => void;
+  onMarkPoint?: () => void;
+  hasVideo?: boolean;
 }
 
 export const VideoEditor: React.FC<VideoEditorProps> = ({
@@ -21,7 +23,9 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
   isLooping,
   setIsLooping,
   onTimeUpdate,
-  setDuration
+  setDuration,
+  onMarkPoint,
+  hasVideo
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -98,14 +102,16 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
 
       {/* Control Bar - Fixed at bottom via shrink-0 in the flex container */}
       <div className="bg-zinc-900 border-t border-zinc-800 px-6 py-4 space-y-4 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] shrink-0 z-20">
-        <PlaybackControls 
-          isPlaying={isPlaying} 
-          togglePlay={togglePlay} 
-          currentTime={currentTime} 
-          duration={metadata.duration} 
+        <PlaybackControls
+          isPlaying={isPlaying}
+          togglePlay={togglePlay}
+          currentTime={currentTime}
+          duration={metadata.duration}
           isLooping={isLooping}
           setIsLooping={setIsLooping}
           seek={seek}
+          onMarkPoint={onMarkPoint}
+          hasVideo={hasVideo}
         />
         
         <Timeline 

@@ -14,6 +14,19 @@ const App: React.FC = () => {
   const [isLooping, setIsLooping] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
+  const [markClickCount, setMarkClickCount] = useState(0);
+
+  // 监听 Enter 键触发 mark point
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && metadata && !isExporting) {
+        e.preventDefault();
+        addSegment();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [metadata, isExporting, currentTime, markClickCount]);
 
   const handleExport = async () => {
     if (!videoFile || segments.length === 0) return;
@@ -60,23 +73,43 @@ const App: React.FC = () => {
       setVideoFile(file);
       setMetadata({
         name: file.name,
-        duration: 0, // Will be updated when video loads
+        duration: 0,
         size: file.size,
         type: file.type,
         url: url
       });
-      setSegments([]); // Reset segments for new video
+      setSegments([]);
+      setMarkClickCount(0);
     }
   };
 
   const addSegment = () => {
-    const newSegment: VideoSegment = {
-      id: Math.random().toString(36).substr(2, 9),
-      start: currentTime,
-      end: Math.min(currentTime + 5, metadata?.duration || 0),
-      label: `Segment ${segments.length + 1}`
-    };
-    setSegments(prev => [...prev, newSegment]);
+    // 基数次点击（1,3,5...）：新建分段（开放状态，end 等于 start）
+    // 偶数次点击（2,4,6...）：闭合前一个分段
+    if (markClickCount % 2 === 0) {
+      // 基数次：创建新分段，开放状态
+      const newSegment: VideoSegment = {
+        id: Math.random().toString(36).substr(2, 9),
+        start: currentTime,
+        end: currentTime,
+        label: `Segment ${Math.floor(markClickCount / 2) + 1}`
+      };
+      setSegments(prev => [...prev, newSegment]);
+    } else {
+      // 偶数次：闭合前一个分段
+      setSegments(prev => {
+        const updated = [...prev];
+        const lastIdx = updated.length - 1;
+        if (lastIdx >= 0) {
+          updated[lastIdx] = {
+            ...updated[lastIdx],
+            end: currentTime
+          };
+        }
+        return updated;
+      });
+    }
+    setMarkClickCount(prev => prev + 1);
   };
 
   const removeSegment = (id: string) => {
@@ -89,11 +122,15 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-zinc-950 text-zinc-100 overflow-hidden">
-      <Header />
+      <Header
+          onExport={handleExport}
+          isExporting={isExporting}
+          hasSegments={segments.length > 0}
+        />
       
       <main className="flex flex-1 overflow-hidden min-h-0">
         {/* Left Sidebar: Controls & Segments */}
-        <Sidebar 
+        <Sidebar
           metadata={metadata}
           segments={segments}
           isMuted={isMuted}
@@ -104,14 +141,13 @@ const App: React.FC = () => {
           onRemoveSegment={removeSegment}
           onUpdateSegment={updateSegment}
           onFileUpload={handleFileUpload}
-          onExport={handleExport}
           isExporting={isExporting}
         />
 
         {/* Center: Video Preview & Timeline */}
         <div className="flex-1 flex flex-col bg-zinc-900 overflow-hidden relative min-h-0">
           {metadata ? (
-            <VideoEditor 
+            <VideoEditor
               metadata={metadata}
               segments={segments}
               isMuted={isMuted}
@@ -119,6 +155,8 @@ const App: React.FC = () => {
               setIsLooping={setIsLooping}
               onTimeUpdate={setCurrentTime}
               setDuration={(d) => setMetadata(prev => prev ? {...prev, duration: d} : null)}
+              onMarkPoint={addSegment}
+              hasVideo={!!videoFile}
             />
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center space-y-4 p-8">

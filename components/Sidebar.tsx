@@ -14,7 +14,6 @@ interface SidebarProps {
   onRemoveSegment: (id: string) => void;
   onUpdateSegment: (id: string, updates: Partial<VideoSegment>) => void;
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onExport: () => void;
   isExporting: boolean;
 }
 
@@ -29,7 +28,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onRemoveSegment,
   onUpdateSegment,
   onFileUpload,
-  onExport,
   isExporting
 }) => {
   return (
@@ -91,18 +89,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Segments List */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="p-4 flex items-center justify-between shrink-0">
+        <div className="p-4 shrink-0">
           <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Cuts & Segments</h3>
-          <button 
-            disabled={!metadata}
-            onClick={onAddSegment}
-            className="p-1 hover:bg-zinc-800 rounded text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Add Segment"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          </button>
         </div>
         
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
@@ -113,9 +101,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ) : (
             segments.map((segment, idx) => (
               <div key={segment.id} className="bg-zinc-800/80 rounded-lg p-3 border border-zinc-700 hover:border-zinc-600 transition-colors">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-blue-400">#0{idx + 1}</span>
-                  <button 
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-bold text-blue-400">#0{idx + 1}</span>
+                    <span className="text-[10px] text-zinc-500 italic ml-[10px]">Duration: {(segment.end - segment.start).toFixed(2)}s</span>
+                  </div>
+                  <button
                     onClick={() => onRemoveSegment(segment.id)}
                     className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
                   >
@@ -124,36 +115,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </svg>
                   </button>
                 </div>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-zinc-500 uppercase font-bold">Start</label>
-                      <input 
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max={segment.end}
-                        value={segment.start}
-                        onChange={(e) => onUpdateSegment(segment.id, { start: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-zinc-900 text-xs p-1.5 rounded border border-zinc-700"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-zinc-500 uppercase font-bold">End</label>
-                      <input 
-                        type="number"
-                        step="0.1"
-                        min={segment.start}
-                        max={metadata?.duration || 1000}
-                        value={segment.end}
-                        onChange={(e) => onUpdateSegment(segment.id, { end: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-zinc-900 text-xs p-1.5 rounded border border-zinc-700"
-                      />
-                    </div>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-zinc-500 uppercase font-bold">Start</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max={segment.end}
+                      value={segment.start}
+                      onChange={(e) => onUpdateSegment(segment.id, { start: parseFloat(e.target.value) || 0 })}
+                      className="w-full bg-zinc-900 text-xs p-1.5 rounded border border-zinc-700"
+                    />
                   </div>
-                  <div className="text-[10px] text-zinc-500 flex justify-between italic">
-                    <span>Duration: {(segment.end - segment.start).toFixed(2)}s</span>
-                    <span>{formatTime(segment.start)} - {formatTime(segment.end)}</span>
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-zinc-500 uppercase font-bold">End</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min={segment.start}
+                      max={metadata?.duration || 1000}
+                      value={segment.end}
+                      onChange={(e) => onUpdateSegment(segment.id, { end: parseFloat(e.target.value) || 0 })}
+                      className="w-full bg-zinc-900 text-xs p-1.5 rounded border border-zinc-700"
+                    />
                   </div>
                 </div>
               </div>
@@ -162,31 +147,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Footer Actions */}
-      <div className="p-4 border-t border-zinc-800 bg-zinc-950/50">
-        <button 
-          disabled={segments.length === 0 || isExporting}
-          onClick={onExport}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-800 disabled:text-zinc-600 rounded-lg font-bold text-sm shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center space-x-2"
-        >
-          {isExporting ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>Processing...</span>
-            </>
-          ) : (
-            <>
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              <span>Export {segments.length} Clips</span>
-            </>
-          )}
-        </button>
-      </div>
-    </aside>
+      </aside>
   );
 };
