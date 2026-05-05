@@ -1,6 +1,6 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { VideoMetadata, VideoSegment, CropConfig } from '../types';
+import { VideoMetadata, VideoSegment } from '../types';
 import { Timeline } from './Timeline';
 import { PlaybackControls } from './PlaybackControls';
 
@@ -14,9 +14,6 @@ interface VideoEditorProps {
   setDuration: (duration: number) => void;
   onMarkPoint?: () => void;
   hasVideo?: boolean;
-  cropConfig?: CropConfig;
-  videoWidth?: number;
-  videoHeight?: number;
 }
 
 export const VideoEditor: React.FC<VideoEditorProps> = ({
@@ -28,15 +25,11 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
   onTimeUpdate,
   setDuration,
   onMarkPoint,
-  hasVideo,
-  cropConfig,
-  videoWidth,
-  videoHeight
+  hasVideo
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [actualVideoSize, setActualVideoSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     if (videoRef.current) {
@@ -55,10 +48,6 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration);
-      setActualVideoSize({
-        width: videoRef.current.videoWidth,
-        height: videoRef.current.videoHeight
-      });
     }
   };
 
@@ -98,7 +87,7 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
         
         {/* Play Overlay */}
         {!isPlaying && (
-          <button
+          <button 
             onClick={togglePlay}
             className="absolute inset-0 flex items-center justify-center bg-black/20 group hover:bg-black/40 transition-all z-10"
           >
@@ -108,45 +97,6 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
               </svg>
             </div>
           </button>
-        )}
-
-        {/* Crop Overlay */}
-        {cropConfig && cropConfig.enabled && actualVideoSize.width > 0 && (
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '100%',
-              height: '100%'
-            }}
-          >
-            <div
-              className="absolute border-2 border-red-500 bg-red-500/10"
-              style={{
-                left: `${(cropConfig.x / actualVideoSize.width) * 100}%`,
-                top: `${(cropConfig.y / actualVideoSize.height) * 100}%`,
-                width: `${(cropConfig.width / actualVideoSize.width) * 100}%`,
-                height: `${(cropConfig.height / actualVideoSize.height) * 100}%`,
-                boxShadow: '0 0 0 9999px rgba(0,0,0,0.5)'
-              }}
-            >
-              {/* Corner handles */}
-              {[
-                { top: -4, left: -4 },
-                { top: -4, right: -4 },
-                { bottom: -4, left: -4 },
-                { bottom: -4, right: -4 }
-              ].map((pos, i) => (
-                <div
-                  key={i}
-                  className="absolute w-2 h-2 bg-red-500 rounded-sm"
-                  style={pos}
-                />
-              ))}
-            </div>
-          </div>
         )}
       </div>
 
@@ -164,14 +114,11 @@ export const VideoEditor: React.FC<VideoEditorProps> = ({
           hasVideo={hasVideo}
         />
         
-        <Timeline
-          duration={metadata.duration}
-          currentTime={currentTime}
-          segments={segments}
+        <Timeline 
+          duration={metadata.duration} 
+          currentTime={currentTime} 
+          segments={segments} 
           onSeek={seek}
-          cropConfig={cropConfig}
-          videoWidth={actualVideoSize.width}
-          videoHeight={actualVideoSize.height}
         />
       </div>
     </div>

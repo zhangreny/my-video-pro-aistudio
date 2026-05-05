@@ -168,7 +168,6 @@ const App: React.FC = () => {
               setDuration={(d) => setMetadata(prev => prev ? {...prev, duration: d} : null)}
               onMarkPoint={addSegment}
               hasVideo={!!videoFile}
-              cropConfig={cropConfig}
             />
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center space-y-4 p-8">
