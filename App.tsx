@@ -3,7 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { VideoEditor } from './components/VideoEditor';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
-import { VideoMetadata, VideoSegment, CropConfig } from './types';
+import { VideoMetadata, VideoSegment } from './types';
 
 const App: React.FC = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -15,13 +15,6 @@ const App: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
   const [markClickCount, setMarkClickCount] = useState(0);
-  const [cropConfig, setCropConfig] = useState<CropConfig>({
-    enabled: false,
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0
-  });
 
   // 监听 Enter 键触发 mark point
   useEffect(() => {
@@ -44,7 +37,6 @@ const App: React.FC = () => {
     formData.append('mute', isMuted.toString());
     formData.append('cancelMaleVoice', isCancelMaleVoice.toString());
     formData.append('segments', JSON.stringify(segments));
-    formData.append('cropConfig', JSON.stringify(cropConfig));
 
     try {
       const response = await fetch('http://localhost:5000/export', {
@@ -88,7 +80,6 @@ const App: React.FC = () => {
       });
       setSegments([]);
       setMarkClickCount(0);
-      setCropConfig({ enabled: false, x: 0, y: 0, width: 0, height: 0 });
     }
   };
 
@@ -146,8 +137,6 @@ const App: React.FC = () => {
           setIsMuted={setIsMuted}
           isCancelMaleVoice={isCancelMaleVoice}
           setIsCancelMaleVoice={setIsCancelMaleVoice}
-          cropConfig={cropConfig}
-          setCropConfig={setCropConfig}
           onAddSegment={addSegment}
           onRemoveSegment={removeSegment}
           onUpdateSegment={updateSegment}
